@@ -1,6 +1,8 @@
-from PyQt5.QtWidgets import QMainWindow, QDesktopWidget,  QLabel, QLineEdit, QWidget,QPushButton
+from PyQt5.QtWidgets import QMainWindow, QDesktopWidget,  QLabel, QLineEdit, QWidget,QPushButton,QMessageBox
 from PyQt5.QtGui import QFont,QRegExpValidator
 from PyQt5.QtCore import Qt, QRect, pyqtSignal,QRegExp
+from guet_VPN import Guet_VPN
+
 
 # 登录界面
 # https://v.guet.edu.cn/do-login
@@ -80,7 +82,8 @@ class Login_Window(QMainWindow):
         reg1validation.setRegExp(reg1)
         self.id_lineEdit.setValidator(reg1validation)
         self.id_lineEdit.textChanged.connect(self.isWarning)
-        # self.passwd_lineEdit.textChanged(self.login)
+        self.passwd_lineEdit.editingFinished.connect(self.login)
+        self.passwd_lineEdit.textEdited.connect(self.clearWarn)
         # self.passwd_lineEdit.editingFinished(self.login)
         # 密码只能有字母,数字，符号
         reg = QRegExp('[0-9A-Za-z!-/ -@]{18}$')
@@ -98,7 +101,7 @@ class Login_Window(QMainWindow):
         # 注册，忘记密码标签
         forget_lab = QLabel(self)
         forget_lab.setGeometry(QRect(620,326,160,30))
-        forget_lab.setText('已有账号，但<a href="https://o8.cn/X0uGQu">忘记密码?</a>')
+        forget_lab.setText('已有账号，但<a href="https://cas.guet.edu.cn:4102/#/password/passwordFound">忘记密码?</a>')
         forget_lab.setOpenExternalLinks(True)
         reg_lab = QLabel(self)
         reg_lab.setGeometry(QRect(520,326,60,30))
@@ -127,7 +130,8 @@ class Login_Window(QMainWindow):
         login_btn.setFont(QFont('华文新魏',14))
         # 设置按钮的绝对位置
         login_btn.setGeometry(QRect(520,385,240,40))
-
+        # 设置登录按钮的槽函数
+        login_btn.clicked.connect(self.login)
 
     # 切换233娘遮掩动作
     def changeBG_1(self):
@@ -149,4 +153,39 @@ class Login_Window(QMainWindow):
         else:
             self.id_warn.setVisible(False)
 
+    # 当密码错误或为空时，再次编辑密码会重新清除错误提示
+    def clearWarn(self):
+        self.passwd_warn.setVisible(False)
+        self.passwd_warn1.setVisible(False)
+
+    # 登录按钮的槽函数
+    def login(self):
+        # 获取编辑框数据
+        user_id = self.id_lineEdit.text()
+        user_passwd = self.passwd_lineEdit.text()
+        # 判断编辑框是否有数值，当没有时，则
+        if user_id:         # 输入账号时
+            if user_passwd: # 输入密码时
+                guet_vpn = Guet_VPN(username=user_id,password=user_passwd)
+                # print(guet_vpn.login_result)
+                # 登录失败时
+                if guet_vpn.login_result == 'false':
+                    self.passwd_lineEdit.clear()    # 清空密码框
+                    self.passwd_warn.setVisible(True)   # 设置密码错误提示
+                    self.passwd_lineEdit.setFocus(True) # 设置密码框为选中状态
+                else:
+                    QMessageBox.information(self,'成功','你已经成功登录',QMessageBox.Ok)
+            else:
+                self.passwd_lineEdit.setFocus(True)  # 设置密码框为选中状态
+                self.passwd_warn1.setVisible(True)
+        else:   # 当不输入任何值时使用默认账号
+            res = QMessageBox.information(self,'提醒','您正在使用软件内置的账号，请文明使用该账号!!!',QMessageBox.Ok|QMessageBox.Cancel)
+            if res == QMessageBox.Ok:
+                guet_vpn = Guet_VPN()
+                if guet_vpn.login_result == 'false':
+                    self.id_lineEdit.clear()
+                    self.passwd_lineEdit.clear()
+                    QMessageBox.information(self,'错误','默认账号出错，联系作者修改账号信息！',QMessageBox.Ok)
+                else:
+                    QMessageBox.information(self,'成功','你已经成功登录',QMessageBox.Ok)
 
