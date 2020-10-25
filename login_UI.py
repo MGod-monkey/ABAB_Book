@@ -1,7 +1,8 @@
-from PyQt5.QtWidgets import QMainWindow, QDesktopWidget,  QLabel, QLineEdit, QWidget,QPushButton,QMessageBox
-from PyQt5.QtGui import QFont,QRegExpValidator
-from PyQt5.QtCore import Qt, QRect, pyqtSignal,QRegExp
+from PyQt5.QtWidgets import QMainWindow, QDesktopWidget,  QLabel, QLineEdit, QWidget,QPushButton,QMessageBox,QCheckBox,QDialog
+from PyQt5.QtGui import QFont,QRegExpValidator,QMovie,QPixmap
+from PyQt5.QtCore import Qt, QRect, pyqtSignal,QRegExp,QTimer
 from guet_VPN import Guet_VPN
+from sys import exit
 
 
 # 登录界面
@@ -16,6 +17,24 @@ class Login_Edit(QLineEdit):
         if QMouseEvent.button() == Qt.LeftButton:
             self.clicked.emit()
 
+# 加载动画的窗口
+class Loading_Win(QDialog):
+    def __init__(self):
+        super(Loading_Win, self).__init__()
+        self.initUI()
+    def initUI(self):
+        # 设置窗口基础类型
+        self.resize(250,250)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint) # 无边框|对画框|置顶
+        # 设置背景透明
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        # 加载动画画面
+        self.loading_gif = QMovie('./img/loading_b.gif')
+        self.loading_label = QLabel(self)
+        self.loading_label.setMovie(self.loading_gif)
+        # self.loading_label.setGeometry(QRect(0,0,250,250))
+        self.loading_gif.start()
+
 # # 重写标签的鼠标按钮事件
 # class Login_Label(QLabel):
 #     clicked = pyqtSignal()
@@ -26,9 +45,10 @@ class Login_Edit(QLineEdit):
 #             self.clicked.emit()
 
 class Login_Window(QMainWindow):
-    def __init__(self):
+    def __init__(self,mainWindow):
         super(Login_Window, self).__init__()
         self.initUI()
+        self.mainWindow = mainWindow
 
     def initUI(self):
         # 设置窗口样式
@@ -44,10 +64,23 @@ class Login_Window(QMainWindow):
         self.win_y = int(screen_size.height() / 2 - win_size.height() / 2)
         self.move(int(screen_size.width() / 2 - win_size.width() / 2),
                   int(screen_size.height() / 2 - win_size.height() / 2))
+        # 创建加载动画窗口
+        self.loading_win = Loading_Win()
+        self.loading_win.hide() # 隐藏加载窗口
 
         # 编辑窗口背景图
         self.setObjectName('login_UI')
         self.setStyleSheet("#login_UI{border-image:url(./img/login_UI/login_bg1.png)}")
+
+        # 图片切换
+        # 计时器，3秒换一张图
+        self.png_num = 1
+        self.png = QLabel(self)
+        self.png.setScaledContents(True)    # 设置照片全照
+        self.png.setGeometry(QRect(22, 25, 330, 498))
+        self.timer = QTimer()
+        self.timer.start(3000)
+        self.timer.timeout.connect(self.changePNG)
 
         # 登录框组件
         widget = QWidget(self)
@@ -98,6 +131,7 @@ class Login_Window(QMainWindow):
                            '和<a href="https://www.bilibili.com/blackboard/privacy-pc.html">隐私政策</a>')
         # 设置标签能打开超文本
         accord_lab.setOpenExternalLinks(True)
+
         # 注册，忘记密码标签
         forget_lab = QLabel(self)
         forget_lab.setGeometry(QRect(620,326,160,30))
@@ -115,8 +149,8 @@ class Login_Window(QMainWindow):
         self.id_warn1 = QLabel('<font color=red><b>账号不能为空</b></font>', self)
         self.id_warn1.setGeometry(QRect(785, 160, 95, 30))
         self.id_warn1.setVisible(False)
-        self.passwd_warn = QLabel('<font color=red><b>密码错误</b></font>',self)
-        self.passwd_warn.setGeometry(QRect(785,283,65,30))
+        self.passwd_warn = QLabel('<font color=red><b>账号或密<br>码错误</b></font>',self)
+        self.passwd_warn.setGeometry(QRect(786,265,65,60))
         self.passwd_warn.setVisible(False)
         self.passwd_warn1 = QLabel('<font color=red><b>密码不能为空</b></font>', self)
         self.passwd_warn1.setGeometry(QRect(785, 283, 95, 30))
@@ -133,6 +167,11 @@ class Login_Window(QMainWindow):
         # 设置登录按钮的槽函数
         login_btn.clicked.connect(self.login)
 
+        # 不需要vpn账号登录
+        self.not_vpn = QCheckBox(self)
+        self.not_vpn.setGeometry(QRect(780,380,150,50))
+        self.not_vpn.setText('我正在使\n用校园网')
+
     # 切换233娘遮掩动作
     def changeBG_1(self):
         self.setStyleSheet("#login_UI{border-image:url(./img/login_UI/login_bg.png)}")
@@ -142,6 +181,15 @@ class Login_Window(QMainWindow):
             self.id_warn1.setVisible(False)
     def changeBG_2(self):
         self.setStyleSheet("#login_UI{border-image:url(./img/login_UI/login_bg1.png)}")
+
+    # 切换图片
+    def changePNG(self):
+        if self.png_num == 4:
+            self.png.setPixmap(QPixmap("./img/login_UI/play_" + str(self.png_num) + '.png'))
+            self.png_num = 1
+        else:
+            self.png.setPixmap(QPixmap("./img/login_UI/play_" + str(self.png_num) + '.png'))
+            self.png_num += 1
 
     # 编辑框不规范提醒
     def isWarning(self):
@@ -158,34 +206,56 @@ class Login_Window(QMainWindow):
         self.passwd_warn.setVisible(False)
         self.passwd_warn1.setVisible(False)
 
+    # 重写主窗口移动事件,当主窗口移动时，加载界面对应的移动
+    def moveEvent(self,moveEvent):
+        move_x = moveEvent.pos().x()+340
+        move_y = moveEvent.pos().y()+155
+        self.loading_win.move(move_x,move_y)
+        # self.png.move(move_x-318,move_y-130)
+    # 重写窗口关闭事件，当主窗口关闭时子窗口也会关闭
+    def closeEvent(self,closeEvent):
+        exit(0)
+
     # 登录按钮的槽函数
     def login(self):
-        # 获取编辑框数据
-        user_id = self.id_lineEdit.text()
-        user_passwd = self.passwd_lineEdit.text()
-        # 判断编辑框是否有数值，当没有时，则
-        if user_id:         # 输入账号时
-            if user_passwd: # 输入密码时
-                guet_vpn = Guet_VPN(username=user_id,password=user_passwd)
-                # print(guet_vpn.login_result)
-                # 登录失败时
-                if guet_vpn.login_result == 'false':
-                    self.passwd_lineEdit.clear()    # 清空密码框
-                    self.passwd_warn.setVisible(True)   # 设置密码错误提示
-                    self.passwd_lineEdit.setFocus(True) # 设置密码框为选中状态
+        if self.not_vpn.isChecked() == False:
+            # 获取编辑框数据之使用vpn账号
+            user_id = self.id_lineEdit.text()
+            user_passwd = self.passwd_lineEdit.text()
+            # 判断编辑框是否有数值，当没有时，则
+            if user_id:         # 输入账号时
+                if user_passwd: # 输入密码时
+                    guet_vpn = Guet_VPN(username=user_id,password=user_passwd)
+                    # 登录失败时
+                    if guet_vpn.login_result == 'false':
+                        self.loading_win.close()
+                        self.id_lineEdit.clear()    # 清除账号框
+                        self.passwd_lineEdit.clear()    # 清空密码框
+                        self.passwd_warn.setVisible(True)   # 设置密码错误提示
+                        self.id_lineEdit.setFocus(True) # 设置密码框为选中状态
+                    # 登录成功
+                    else:
+                        # 加载动画页面
+                        self.loading_win.show()
+                        self.setWindowOpacity(0.9)
+                # 无密码时提示输入密码
                 else:
-                    QMessageBox.information(self,'成功','你已经成功登录',QMessageBox.Ok)
-            else:
-                self.passwd_lineEdit.setFocus(True)  # 设置密码框为选中状态
-                self.passwd_warn1.setVisible(True)
-        else:   # 当不输入任何值时使用默认账号
-            res = QMessageBox.information(self,'提醒','您正在使用软件内置的账号，请文明使用该账号!!!',QMessageBox.Ok|QMessageBox.Cancel)
-            if res == QMessageBox.Ok:
-                guet_vpn = Guet_VPN()
-                if guet_vpn.login_result == 'false':
-                    self.id_lineEdit.clear()
-                    self.passwd_lineEdit.clear()
-                    QMessageBox.information(self,'错误','默认账号出错，联系作者修改账号信息！',QMessageBox.Ok)
-                else:
-                    QMessageBox.information(self,'成功','你已经成功登录',QMessageBox.Ok)
-
+                    self.passwd_lineEdit.setFocus(True)  # 设置密码框为选中状态
+                    self.passwd_warn1.setVisible(True)
+            else:   # 当不输入任何值时使用默认账号
+                res = QMessageBox.information(self,'提醒','您正在使用软件内置的账号，请文明使用该账号!!!',QMessageBox.Ok|QMessageBox.Cancel)
+                if res == QMessageBox.Ok:
+                    # 登录加载动画
+                    guet_vpn = Guet_VPN()
+                    if guet_vpn.login_result == 'false':
+                        self.id_lineEdit.clear()
+                        self.passwd_lineEdit.clear()
+                        QMessageBox.information(self,'错误','默认账号出错，联系作者修改账号信息！',QMessageBox.Ok)
+                    else:
+                        self.loading_win.show()
+                        self.setWindowOpacity(0.9)
+        # 不使用vpn登录
+        else:
+            # self.setWindowModality(Qt.WindowModal) # 设置登录界面不可选中
+            # if self.mainWindow.show():
+            pass
