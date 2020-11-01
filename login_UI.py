@@ -1,12 +1,8 @@
-from PyQt5.QtWidgets import QMainWindow, QDesktopWidget,  QLabel, QLineEdit, QWidget,QPushButton,QMessageBox,QCheckBox,QDialog
-from PyQt5.QtGui import QFont,QRegExpValidator,QMovie,QPixmap
+from PyQt5.QtWidgets import QMainWindow, QDesktopWidget, QLabel, QLineEdit, QWidget,QPushButton,QMessageBox,QCheckBox
+from PyQt5.QtGui import QFont,QRegExpValidator,QPixmap
 from PyQt5.QtCore import Qt, QRect, pyqtSignal,QRegExp,QTimer
 from guet_VPN import Guet_VPN
-from sys import exit
 
-
-# 登录界面
-# https://v.guet.edu.cn/do-login
 # 重写输入框的鼠标点击事件
 class Login_Edit(QLineEdit):
     clicked = pyqtSignal()
@@ -17,23 +13,23 @@ class Login_Edit(QLineEdit):
         if QMouseEvent.button() == Qt.LeftButton:
             self.clicked.emit()
 
-# 加载动画的窗口
-class Loading_Win(QDialog):
-    def __init__(self):
-        super(Loading_Win, self).__init__()
-        self.initUI()
-    def initUI(self):
-        # 设置窗口基础类型
-        self.resize(250,250)
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint) # 无边框|对画框|置顶
-        # 设置背景透明
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        # 加载动画画面
-        self.loading_gif = QMovie('./img/loading_b.gif')
-        self.loading_label = QLabel(self)
-        self.loading_label.setMovie(self.loading_gif)
-        # self.loading_label.setGeometry(QRect(0,0,250,250))
-        self.loading_gif.start()
+# # 加载动画的窗口
+# class Loading_Win(QDialog):
+#     def __init__(self):
+#         super(Loading_Win, self).__init__()
+#         self.initUI()
+#     def initUI(self):
+#         # 设置窗口基础类型
+#         self.resize(250,250)
+#         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint) # 无边框|对画框|置顶
+#         # 设置背景透明
+#         self.setAttribute(Qt.WA_TranslucentBackground)
+#         # 加载动画画面
+#         self.loading_gif = QMovie('./img/loading_b.gif')
+#         self.loading_label = QLabel(self)
+#         self.loading_label.setMovie(self.loading_gif)
+#         # self.loading_label.setGeometry(QRect(0,0,250,250))
+#         self.loading_gif.start()
 
 # # 重写标签的鼠标按钮事件
 # class Login_Label(QLabel):
@@ -45,10 +41,11 @@ class Loading_Win(QDialog):
 #             self.clicked.emit()
 
 class Login_Window(QMainWindow):
-    def __init__(self,mainWindow):
+    def __init__(self,main_win=None):
         super(Login_Window, self).__init__()
         self.initUI()
-        self.mainWindow = mainWindow
+        self.main_win = main_win
+        self.show()
 
     def initUI(self):
         # 设置窗口样式
@@ -64,9 +61,6 @@ class Login_Window(QMainWindow):
         self.win_y = int(screen_size.height() / 2 - win_size.height() / 2)
         self.move(int(screen_size.width() / 2 - win_size.width() / 2),
                   int(screen_size.height() / 2 - win_size.height() / 2))
-        # 创建加载动画窗口
-        self.loading_win = Loading_Win()
-        self.loading_win.hide() # 隐藏加载窗口
 
         # 编辑窗口背景图
         self.setObjectName('login_UI')
@@ -206,15 +200,12 @@ class Login_Window(QMainWindow):
         self.passwd_warn.setVisible(False)
         self.passwd_warn1.setVisible(False)
 
-    # 重写主窗口移动事件,当主窗口移动时，加载界面对应的移动
-    def moveEvent(self,moveEvent):
-        move_x = moveEvent.pos().x()+340
-        move_y = moveEvent.pos().y()+155
-        self.loading_win.move(move_x,move_y)
-        # self.png.move(move_x-318,move_y-130)
-    # 重写窗口关闭事件，当主窗口关闭时子窗口也会关闭
-    def closeEvent(self,closeEvent):
-        exit(0)
+    # # 重写主窗口移动事件,当主窗口移动时，加载界面对应的移动
+    # def moveEvent(self,moveEvent):
+    #     move_x = moveEvent.pos().x()+340
+    #     move_y = moveEvent.pos().y()+155
+    #     self.loading_win.move(move_x,move_y)
+    #     # self.png.move(move_x-318,move_y-130)
 
     # 登录按钮的槽函数
     def login(self):
@@ -237,7 +228,12 @@ class Login_Window(QMainWindow):
                     else:
                         # 加载动画页面
                         self.loading_win.show()
-                        self.setWindowOpacity(0.9)
+                        while True:
+                            if self.parent.init_UI():
+                                self.close()
+                                self.parent.show()
+                                break
+
                 # 无密码时提示输入密码
                 else:
                     self.passwd_lineEdit.setFocus(True)  # 设置密码框为选中状态
@@ -253,9 +249,13 @@ class Login_Window(QMainWindow):
                         QMessageBox.information(self,'错误','默认账号出错，联系作者修改账号信息！',QMessageBox.Ok)
                     else:
                         self.loading_win.show()
-                        self.setWindowOpacity(0.9)
         # 不使用vpn登录
         else:
-            # self.setWindowModality(Qt.WindowModal) # 设置登录界面不可选中
-            # if self.mainWindow.show():
-            pass
+            self.setWindowModality(Qt.WindowModal) # 设置登录界面不可选中
+            self.loading_win.show()
+            if self.main_win.init_UI():
+                self.close()
+                self.loading_win.close()
+                self.main_win.show()
+
+
