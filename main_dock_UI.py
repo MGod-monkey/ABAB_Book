@@ -241,19 +241,19 @@ class Dock_Win(QWidget):
             painter.drawPath(i_path)
 
         # 圆角
-        self.painter_rect = QPainter(self)
-        self.painter_rect.setRenderHint(QPainter.Antialiasing)  # 抗锯齿
-        self.painter_rect.setBrush(self.bg_color)
-        self.painter_rect.setPen(Qt.transparent)
+        painter_rect = QPainter()
+        painter_rect.setRenderHint(QPainter.Antialiasing)  # 抗锯齿
+        painter_rect.setBrush(self.bg_color)
+        painter_rect.setPen(Qt.transparent)
 
-        self._rect = self.rect()
-        self._rect.setLeft(15)
-        self._rect.setTop(15)
-        self._rect.setWidth(self._rect.width() - 15)
-        self._rect.setHeight(self._rect.height() - 15)
-        self.painter_rect.begin(self)
-        self.painter_rect.drawRoundedRect(self._rect, 15, 15)
-        self.painter_rect.end()
+        _rect = self.rect()
+        _rect.setLeft(15)
+        _rect.setTop(15)
+        _rect.setWidth(_rect.width() - 15)
+        _rect.setHeight(_rect.height() - 15)
+        painter_rect.begin(self)
+        painter_rect.drawRoundedRect(_rect, 15, 15)
+        painter_rect.end()
 
     # 设置窗口移动事件
     # 当鼠标左击并且移动时触发窗口移动事件

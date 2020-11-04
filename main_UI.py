@@ -142,10 +142,10 @@ class Main_UI(QMainWindow):
 
 
 
-app = QApplication(argv)
-# test_win = Main_UI()
-# test_win.show()
-dock_win = Dock_Win()
-dock_win.show()
-exit(app.exec_())
+# app = QApplication(argv)
+# # test_win = Main_UI()
+# # test_win.show()
+# dock_win = Dock_Win()
+# dock_win.show()
+# exit(app.exec_())
 
