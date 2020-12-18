@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QDesktopWidget, QColorDialog,QMenu,QAction
-from PyQt5.QtGui import QFont, QPainterPath, QPainter, QBrush, QColor, QCursor, QPixmap
-from PyQt5.QtCore import Qt, QRectF, pyqtSignal,QPoint
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from sys import exit, argv
 
 
@@ -86,8 +86,8 @@ class QLabel_Item(QLabel):
 class Dock_Win(QWidget):
     def __init__(self, parent=None):
         super(Dock_Win, self).__init__(parent)
-        self.bg_color = QColor(170, 248, 248, 230)  # 设置背警色
-        self.fill_color = QColor(0,250,255,50) # 阴影颜色
+        # self.bg_color = QColor(170, 248, 248, 230)  # 设置背警色
+        # self.fill_color = QColor(0,250,255,50) # 阴影颜色
         # 获取窗口坐标
         screen_size = QDesktopWidget().geometry()
         win_size = self.geometry()
@@ -99,18 +99,20 @@ class Dock_Win(QWidget):
 
     def initUI(self):
         # 设置窗口透明，无边框
-        self.setAttribute(Qt.WA_TranslucentBackground)  # 透明背景
+        # self.setAttribute(Qt.WA_TranslucentBackground)  # 透明背景
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.Dialog)
+        pl = QPalette(QColor(55,255,255,30))
+        self.setPalette(pl)
         # 设置窗口的大小
         self.resize(462, 110)
         # 添加item
         self.new_label()
         # 设置提示图标样式
-        self.setStyleSheet('QToolTip {font-family: "华文新魏";font-size: 15px;'
-                           'color: #BDC8E2;font-style: italic;padding-right: 2px;padding-top: 2px;font-widget: bold;'
-                           'padding-bottom: 2px;border-style: solid;border-width: 1px;border-color: aqua;border-radius: 13px;'
-                           'background-color: #2E3648;background-position: left center;}'
-                           'QLabel_Item {border-radius:10px} #play{border-radius:20px}')
+        # self.setStyleSheet('QToolTip {font-family: "华文新魏";font-size: 15px;'
+        #                    'color: #BDC8E2;font-style: italic;padding-right: 2px;padding-top: 2px;font-widget: bold;'
+        #                    'padding-bottom: 2px;border-style: solid;border-width: 1px;border-color: aqua;border-radius: 13px;'
+        #                    'background-color: #2E3648;background-position: left center;}'
+        #                    'QLabel_Item {border-radius:10px} #play{border-radius:20px}')
 
     def new_label(self):
         self.label_search = QLabel_Item(1,'./img/main_UI/dock/search_no.png','./img/main_UI/dock/search_on.png','搜索',parent=self)
@@ -129,131 +131,131 @@ class Dock_Win(QWidget):
         for i in [self.label_search,self.label_libaray,self.label_book,self.label_magazine]:
             if i != label:
                 i.set_no()
-
-    def changeBgColor(self,text=None):       # 修改背景颜色
-        # if text == '天空蓝':
-        #     color = QColor(74,158,255,240)
-        # elif text == '基佬紫':
-        #     color = QColor(214,33,255,240)
-        # elif text == '深林绿':
-        #     color = QColor(0,255,0,240)
-        # elif text == '烈焰红':
-        #     color = QColor(252,0,0,240)
-        # elif text == '柠檬黄':
-        #     color = QColor(255,245,36,240)
-        # else:
-        print('我被调用了')
-        color = QColorDialog(self).getColor()
-        color.setAlpha(230)
-        self.bg_color = color
-    def changeGhColor(self,text=None):       # 修改光圈颜色
-        # if text == '天空蓝':
-        #     color = QColor(74,158,255,240)
-        # elif text == '烈焰红':
-        #     color = QColor(255,0,0,240)
-        # elif text == '柠檬黄':
-        #     color = QColor(255,245,36,240)
-        # elif text == '基佬紫':
-        #     color = QColor(214,33,255,240)
-        # elif text == '深林绿':
-        #     color = QColor(0,255,0,240)
-        # else:
-        color = QColorDialog(self).getColor()
-        self.fill_color = color
     #
-    def contextMenuEvent(self, event):  # 连接菜单事件
-        # 设置右击菜单
-        right_menu = QMenu(self)
-        set_bg_color = QAction('背景色')
-        right_menu.addAction(set_bg_color)
-        # tkl_bg_color = QAction('天空蓝')
-        # lyh_bg_color = QAction('烈焰红')
-        # mmh_bg_color = QAction('柠檬黄')
-        # sll_bg_color = QAction('深林绿')
-        # jlz_bg_color = QAction('基佬紫')
-        # other_bg_color = QAction('自定义颜色')
-        # set_bg_color.addAction(tkl_bg_color)
-        # set_bg_color.addAction(lyh_bg_color)
-        # set_bg_color.addAction(mmh_bg_color)
-        # set_bg_color.addAction(sll_bg_color)
-        # set_bg_color.addAction(jlz_bg_color)
-        # set_bg_color.addSeparator()  # 添加分隔线
-        # set_bg_color.addAction(set_bg_color)
+    # def changeBgColor(self,text=None):       # 修改背景颜色
+    #     # if text == '天空蓝':
+    #     #     color = QColor(74,158,255,240)
+    #     # elif text == '基佬紫':
+    #     #     color = QColor(214,33,255,240)
+    #     # elif text == '深林绿':
+    #     #     color = QColor(0,255,0,240)
+    #     # elif text == '烈焰红':
+    #     #     color = QColor(252,0,0,240)
+    #     # elif text == '柠檬黄':
+    #     #     color = QColor(255,245,36,240)
+    #     # else:
+    #     color = QColorDialog(self).getColor()
+    #     color.setAlpha(230)
+    #     self.bg_color = color
+    # def changeGhColor(self,text=None):       # 修改光圈颜色
+    #     # if text == '天空蓝':
+    #     #     color = QColor(74,158,255,240)
+    #     # elif text == '烈焰红':
+    #     #     color = QColor(255,0,0,240)
+    #     # elif text == '柠檬黄':
+    #     #     color = QColor(255,245,36,240)
+    #     # elif text == '基佬紫':
+    #     #     color = QColor(214,33,255,240)
+    #     # elif text == '深林绿':
+    #     #     color = QColor(0,255,0,240)
+    #     # else:
+    #     color = QColorDialog(self).getColor()
+    #     self.fill_color = color
+    # #
+    # def contextMenuEvent(self, event):  # 连接菜单事件
+    #     # 设置右击菜单
+    #     right_menu = QMenu(self)
+    #     set_bg_color = QAction('背景色')
+    #     right_menu.addAction(set_bg_color)
+    #     # tkl_bg_color = QAction('天空蓝')
+    #     # lyh_bg_color = QAction('烈焰红')
+    #     # mmh_bg_color = QAction('柠檬黄')
+    #     # sll_bg_color = QAction('深林绿')
+    #     # jlz_bg_color = QAction('基佬紫')
+    #     # other_bg_color = QAction('自定义颜色')
+    #     # set_bg_color.addAction(tkl_bg_color)
+    #     # set_bg_color.addAction(lyh_bg_color)
+    #     # set_bg_color.addAction(mmh_bg_color)
+    #     # set_bg_color.addAction(sll_bg_color)
+    #     # set_bg_color.addAction(jlz_bg_color)
+    #     # set_bg_color.addSeparator()  # 添加分隔线
+    #     # set_bg_color.addAction(set_bg_color)
+    #
+    #     # tkl_bg_color.triggered.connect(lambda: self.changeBgColor(tkl_bg_color.text()))
+    #     # lyh_bg_color.triggered.connect(lambda: self.changeBgColor(lyh_bg_color.text()))
+    #     # mmh_bg_color.triggered.connect(lambda: self.changeBgColor(mmh_bg_color.text()))
+    #     # jlz_bg_color.triggered.connect(lambda: self.changeBgColor(jlz_bg_color.text()))
+    #     # sll_bg_color.triggered.connect(lambda: self.changeBgColor(sll_bg_color.text()))
+    #     set_bg_color.triggered.connect(lambda: self.changeBgColor(''))
+    #
+    #     set_gh_color = QAction('光圈色')
+    #     right_menu.addAction(set_gh_color)
+    #     # right_menu.addMenu(set_gh_color)
+    #     # tkl_gh_color = QAction('天空蓝')
+    #     # lyh_gh_color = QAction('烈焰红')
+    #     # mmh_gh_color = QAction('柠檬黄')
+    #     # sll_gh_color = QAction('深林绿')
+    #     # jlz_gh_color = QAction('基佬紫')
+    #     # other_gh_color = QAction('自定义颜色')
+    #     # set_gh_color.addAction(tkl_gh_color)
+    #     # set_gh_color.addAction(lyh_gh_color)
+    #     # set_gh_color.addAction(mmh_gh_color)
+    #     # set_gh_color.addAction(sll_gh_color)
+    #     # set_gh_color.addAction(jlz_gh_color)
+    #     # set_gh_color.addSeparator()  # 添加分隔线
+    #     # set_gh_color.addAction(other_gh_color)
+    #     #
+    #     # tkl_gh_color.triggered.connect(lambda: self.changeGhColor(tkl_gh_color.text()))
+    #     # lyh_gh_color.triggered.connect(lambda: self.changeGhColor(lyh_gh_color.text()))
+    #     # mmh_gh_color.triggered.connect(lambda: self.changeGhColor(mmh_gh_color.text()))
+    #     # jlz_gh_color.triggered.coonnect(lambda: self.changeGhColor(jlz_gh_color.text()))
+    #     # sll_gh_color.triggered.connect(lambda: self.changeGhColor(sll_gh_color.text()))
+    #     set_gh_color.triggered.connect(lambda: self.changeGhColor(''))
+    #     #
+    #
+    #     exit_menu = QAction('退 出',right_menu)
+    #     exit_menu.triggered.connect(right_menu.close)
+    #     auto_hide = QAction('自动隐藏')
+    #     right_menu.addAction(auto_hide)
+    #     right_menu.addSeparator()   # 添加分割符
+    #     right_menu.addAction(exit_menu)
+    #     if not self.childAt(event.globalPos()-self.pos()):
+    #         right_menu.exec_(event.globalPos())
 
-        # tkl_bg_color.triggered.connect(lambda: self.changeBgColor(tkl_bg_color.text()))
-        # lyh_bg_color.triggered.connect(lambda: self.changeBgColor(lyh_bg_color.text()))
-        # mmh_bg_color.triggered.connect(lambda: self.changeBgColor(mmh_bg_color.text()))
-        # jlz_bg_color.triggered.connect(lambda: self.changeBgColor(jlz_bg_color.text()))
-        # sll_bg_color.triggered.connect(lambda: self.changeBgColor(sll_bg_color.text()))
-        set_bg_color.triggered.connect(lambda: self.changeBgColor(''))
 
-        set_gh_color = QAction('光圈色')
-        right_menu.addAction(set_gh_color)
-        # right_menu.addMenu(set_gh_color)
-        # tkl_gh_color = QAction('天空蓝')
-        # lyh_gh_color = QAction('烈焰红')
-        # mmh_gh_color = QAction('柠檬黄')
-        # sll_gh_color = QAction('深林绿')
-        # jlz_gh_color = QAction('基佬紫')
-        # other_gh_color = QAction('自定义颜色')
-        # set_gh_color.addAction(tkl_gh_color)
-        # set_gh_color.addAction(lyh_gh_color)
-        # set_gh_color.addAction(mmh_gh_color)
-        # set_gh_color.addAction(sll_gh_color)
-        # set_gh_color.addAction(jlz_gh_color)
-        # set_gh_color.addSeparator()  # 添加分隔线
-        # set_gh_color.addAction(other_gh_color)
-        #
-        # tkl_gh_color.triggered.connect(lambda: self.changeGhColor(tkl_gh_color.text()))
-        # lyh_gh_color.triggered.connect(lambda: self.changeGhColor(lyh_gh_color.text()))
-        # mmh_gh_color.triggered.connect(lambda: self.changeGhColor(mmh_gh_color.text()))
-        # jlz_gh_color.triggered.coonnect(lambda: self.changeGhColor(jlz_gh_color.text()))
-        # sll_gh_color.triggered.connect(lambda: self.changeGhColor(sll_gh_color.text()))
-        set_gh_color.triggered.connect(lambda: self.changeGhColor(''))
-        #
-
-        exit_menu = QAction('退 出',right_menu)
-        exit_menu.triggered.connect(right_menu.close)
-        auto_hide = QAction('自动隐藏')
-        right_menu.addAction(auto_hide)
-        right_menu.addSeparator()   # 添加分割符
-        right_menu.addAction(exit_menu)
-        if not self.childAt(event.globalPos()-self.pos()):
-            right_menu.exec_(event.globalPos())
-
-
-    # 设置窗口圆角+边框阴影
-    def paintEvent(self, event):
-        # 设置阴影
-        painter_path = QPainterPath()
-        painter_path.setFillRule(Qt.WindingFill)
-
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.fillPath(painter_path, QBrush(Qt.white))
-        for i in range(10):
-            i_path = QPainterPath()
-            i_path.setFillRule(Qt.WindingFill)
-            ref = QRectF(10 - i, 10 - i, self.width() - (10 - i) * 2, self.height() - (10 - i) * 2)
-            i_path.addRoundedRect(ref, 20, 20)
-            self.fill_color.setAlpha(int(150 - i ** 0.5 * 50))
-            painter.setPen(self.fill_color)
-            painter.drawPath(i_path)
-
-        # 圆角
-        painter_rect = QPainter()
-        painter_rect.setRenderHint(QPainter.Antialiasing)  # 抗锯齿
-        painter_rect.setBrush(self.bg_color)
-        painter_rect.setPen(Qt.transparent)
-
-        _rect = self.rect()
-        _rect.setLeft(15)
-        _rect.setTop(15)
-        _rect.setWidth(_rect.width() - 15)
-        _rect.setHeight(_rect.height() - 15)
-        painter_rect.begin(self)
-        painter_rect.drawRoundedRect(_rect, 15, 15)
-        painter_rect.end()
+   # # 设置窗口圆角+边框阴影
+   #  def paintEvent(self, event):
+   #      # # 设置阴影
+   #      # painter_path = QPainterPath()
+   #      # painter_path.setFillRule(Qt.WindingFill)
+   #      #
+   #      # painter = QPainter(self)
+   #      # painter.setRenderHint(QPainter.Antialiasing)
+   #      # painter.fillPath(painter_path, QBrush(Qt.white))
+   #      # for i in range(10):
+   #      #     i_path = QPainterPath()
+   #      #     i_path.setFillRule(Qt.WindingFill)
+   #      #     ref = QRectF(10 - i, 10 - i, self.width() - (10 - i) * 2, self.height() - (10 - i) * 2)
+   #      #     i_path.addRoundedRect(ref, 20, 20)
+   #      #     self.fill_color.setAlpha(int(150 - i ** 0.5 * 50))
+   #      #     painter.setPen(self.fill_color)
+   #      #     painter.drawPath(i_path)
+   #
+   #      # 圆角
+   #      painter_rect = QPainter()
+   #      painter_rect.setRenderHint(QPainter.Antialiasing)  # 抗锯齿
+   #      painter_rect.setBrush(QColor(255,255,255,200))
+   #      painter_rect.setOpacity(0.5)
+   #      painter_rect.setPen(Qt.transparent)
+   #
+   #      _rect = self.rect()
+   #      # _rect.setLeft(15)
+   #      # _rect.setTop(15)
+   #      _rect.setWidth(_rect.width() - 15)
+   #      _rect.setHeight(_rect.height() - 15)
+   #      painter_rect.begin(self)
+   #      painter_rect.drawRoundedRect(_rect, 15, 15)
+   #      painter_rect.end()
 
     # 设置窗口移动事件
     # 当鼠标左击并且移动时触发窗口移动事件
